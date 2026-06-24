@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Daily Brief</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        input, button { padding: 10px; margin: 5px 0; width: 100%; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        ul { list-style: none; padding: 0; }
+        li { background: #eee; margin: 5px 0; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .delete-btn { background: #dc3545; width: auto; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>My Daily Brief</h1>
+        
+        <h2>Settings</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="text" id="phone" placeholder="Telegram Chat ID">
+        <button onclick="saveSettings()">Save Settings</button>
+
+        <h2>Add Task</h2>
+        <input type="text" id="title" placeholder="Task Title">
+        <input type="datetime-local" id="dueDate">
+        <input type="datetime-local" id="reminderTime">
+        <button onclick="addTask()">Add Task</button>
+
+        <h2>My Tasks</h2>
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+        async function loadTasks() {
+            const res = await fetch('/api/tasks');
+            const tasks = await res.json();
+            const list = document.getElementById('taskList');
+            list.innerHTML = tasks.map(t => `<li>${t.title} (Due: ${t.due_date}) <button class="delete-btn" onclick="deleteTask(${t.id})">Delete</button></li>`).join('');
+        }
+
+        async function addTask() {
+            const title = document.getElementById('title').value;
+            const due_date = document.getElementById('dueDate').value;
+            const reminder_time = document.getElementById('reminderTime').value;
+            await fetch('/api/tasks', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ title, due_date, reminder_time, email_notif: true, sms_notif: true }) });
+            loadTasks();
+        }
+
+        async function deleteTask(id) {
+            await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+            loadTasks();
+        }
+
+        async function saveSettings() {
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            await fetch('/api/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, phone, email_notif: true, sms_notif: true }) });
+            alert('Settings Saved!');
+        }
+
+        loadTasks();
+    </script>
+<script>document.addEventListener("DOMContentLoaded",()=>{const n=new Date();n.setMinutes(n.getMinutes()-n.getTimezoneOffset());const l=n.toISOString().slice(0,16);document.querySelectorAll("input[type=\"datetime-local\"]").forEach(i=>{if(!i.value)i.value=l})});</script><script>document.addEventListener("DOMContentLoaded",()=>{const n=new Date();n.setMinutes(n.getMinutes()-n.getTimezoneOffset());const l=n.toISOString().slice(0,16);document.querySelectorAll("input[type=\"datetime-local\"]").forEach(i=>{if(!i.value)i.value=l})});</script></body>
+</html>

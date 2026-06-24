@@ -1,0 +1,13 @@
+language = "nodejs"
+run = "node server.js"
+modules = ["nodejs-20"]
+
+[agent]
+expertMode = true
+
+[[ports]]
+localPort = 3000
+externalPort = 80
+
+[nix]
+packages = ["nano"]
